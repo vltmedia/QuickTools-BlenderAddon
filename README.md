@@ -16,12 +16,14 @@ Quick Tools is a Blender addon to be used on Blender 2.8 +. The tools in this ad
 - View3D > N Addon Bar > Quick Tools
   - Open with the ```N``` key.
 
-| Name                  | Description                                                  | Location                                                    | Gif                                                          |
-| --------------------- | ------------------------------------------------------------ | ----------------------------------------------------------- | ------------------------------------------------------------ |
-| Swap Objects By Name  | Swap objects with the matching name patterns.                | View3D > Quick Tools > Swap Objects > Swap Objects By Name  | ![](https://vltmediablog.ml/content/images/2020/12/201207-ARH-QuickToolsv031_SwapByName_01.gif) |
-| Swap Selected Objects | Swap selected objects the selected objects with the matching Template Object. | View3D > Quick Tools > Swap Objects > Swap Selected Objects | ![](https://vltmediablog.ml/content/images/2020/12/201207-ARH-QuickToolsv031_SwapSelected_01.gif) |
+| Name                  | Description                                                  | Location                                                    |
+| --------------------- | ------------------------------------------------------------ | ----------------------------------------------------------- |
+| Swap Objects By Name  | Swap objects with the matching name patterns.                | View3D > Quick Tools > Swap Objects > Swap Objects By Name  |
+| Swap Selected Objects | Swap selected objects the selected objects with the matching Template Object. | View3D > Quick Tools > Swap Objects > Swap Selected Objects |
 
+![](https://vltmediablog.ml/content/images/2020/12/201207-ARH-QuickToolsv031_SwapByName_01.gif)
 
+![](https://vltmediablog.ml/content/images/2020/12/201207-ARH-QuickToolsv031_SwapSelected_01.gif)
 
 ### Guide
 
