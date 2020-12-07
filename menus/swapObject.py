@@ -33,7 +33,7 @@ class swapObjectVars(PropertyGroup):
 # bpy.utils.register_class(SwapNameSettings)
 class OBJECT_OT_swapobjectsingle(bpy.types.Operator):
     bl_idname = 'object.swapobjectsingle'
-    bl_label = 'Swap Object Single'
+    bl_label = 'Swap Objects By Name'
     bl_options = {'REGISTER', 'UNDO'}
     NamePattern: bpy.props.StringProperty(name="Source Name Pattern", default="Cube.*")
     TemplateObject: bpy.props.StringProperty(name="Template Object Name", default="Template")
@@ -48,56 +48,73 @@ class OBJECT_OT_swapobjectsingle(bpy.types.Operator):
         selects = context.selected_objects
         currentcount = 0
         transformss = []
-        
-        for obj in selects:
-            bpy.data.objects[self.TemplateObject].select_set(True)
-            templatee = bpy.context.selected_objects[0]
-            if obj != templatee:
+        try:
+            # bpy.data.objects[self.TemplateObject].select_set(True)
+            objjj = bpy.data.objects[self.TemplateObject]
+            print(objjj)
             
-                transformss.append([obj.location, obj.rotation_quaternion, obj.scale])
-                collectionss = obj.users_collection
-                
-                # ob = bpy.data.objects.get(self.TemplateObject)
-                
-                ob_dup = templatee.copy()
-                
-                
-                if self.TargetCollectionPost == "COPY":
-                    for collection in collectionss:
-                        collection.objects.link(ob_dup)
-                if self.TargetCollectionPost == "BASE":
-                    bpy.data.collections['Collection'].objects.link(ob_dup)
-                ob_dup.name = self.NewMeshName + str(currentcount)
+            for obj in selects:
             
-                # Create the new object by linking to the template's mesh data
-                new_object = ob_dup
-                new_object.location = obj.location
-                new_object.rotation_quaternion = obj.rotation_quaternion
-                new_object.scale = obj.scale
-
-
-                if self.SourcePost == "HIDE":
-                    obj.hide_viewport = True
-                    obj.hide_render = True
-                if self.SourcePost == "DELETE":
-                    bpy.ops.object.select_all(action='DESELECT')
-                    # select the object
-                    obj.select_set(True)
-                    # delete all selected objects
-                    bpy.ops.object.delete()
+                bpy.data.objects[self.TemplateObject].select_set(True)
+                templatee = bpy.context.selected_objects[0]
+            
+                if obj != templatee:
+                
+                    transformss.append([obj.location, obj.rotation_quaternion, obj.scale])
+                    collectionss = obj.users_collection
                     
-                # Create a new animation for the newly created object
-                nextcount = currentcount + 1
-                currentcount = nextcount
+                    # ob = bpy.data.objects.get(self.TemplateObject)
+                    
+                    ob_dup = templatee.copy()
+                    
+                    
+                    if self.TargetCollectionPost == "COPY":
+                        for collection in collectionss:
+                            collection.objects.link(ob_dup)
+                    if self.TargetCollectionPost == "BASE":
+                        bpy.data.collections['Collection'].objects.link(ob_dup)
+                    ob_dup.name = self.NewMeshName + str(currentcount)
+                
+                    # Create the new object by linking to the template's mesh data
+                    new_object = ob_dup
+                    new_object.location = obj.location
+                    new_object.rotation_quaternion = obj.rotation_quaternion
+                    new_object.scale = obj.scale
+
+
+                    if self.SourcePost == "HIDE":
+                        obj.hide_viewport = True
+                        obj.hide_render = True
+                    if self.SourcePost == "DELETE":
+                        bpy.ops.object.select_all(action='DESELECT')
+                        # select the object
+                        obj.select_set(True)
+                        # delete all selected objects
+                        bpy.ops.object.delete()
+                        
+                    # Create a new animation for the newly created object
+                    nextcount = currentcount + 1
+                    currentcount = nextcount
+            ShowMessageBox("Finished Swaping objects!", "Quick Tools : Swap Complete!", 'HEART')
+        except :
+            #Shows a message box with a message, custom title, and a specific icon
+            ShowMessageBox("Please Set the Template Object Name Correctly Then Hit Enter.", "Template Object Not Found", 'ERROR')
+            
         return {'FINISHED'}
 
 
+def ShowMessageBox(message = "", title = "Message Box", icon = 'INFO'):
+
+    def draw(self, context):
+        self.layout.label(text=message)
+
+    bpy.context.window_manager.popup_menu(draw, title = title, icon = icon)
 
 
 # bpy.utils.register_class(SwapNameSettings)
 class OBJECT_OT_swapobjectselections(bpy.types.Operator):
     bl_idname = 'object.swapobjectselections'
-    bl_label = 'Swap Object Selections'
+    bl_label = 'Swap Selected Objects'
     bl_options = {'REGISTER', 'UNDO'}
     TemplateObject: bpy.props.StringProperty(name="Template Object Name", default="Template")
     NewMeshName: bpy.props.StringProperty(name="New Mesh Name Template", default="NewObjectName_")
@@ -111,46 +128,54 @@ class OBJECT_OT_swapobjectselections(bpy.types.Operator):
         currentcount = 0
         transformss = []
         lastindex = len(selects) - 1
-    
-        for obj in selects:
-            bpy.data.objects[self.TemplateObject].select_set(True)
-            templatee = bpy.context.selected_objects[0]
-            if obj != templatee:
-                transformss.append([obj.location, obj.rotation_quaternion, obj.scale])
-                collectionss = obj.users_collection
-    
-                
-                # ob = bpy.data.objects.get(self.TemplateObject)
-                
-                ob_dup = templatee.copy()
-                
-                
-                if self.TargetCollectionPost == "COPY":
-                    for collection in collectionss:
-                        collection.objects.link(ob_dup)
-                if self.TargetCollectionPost == "BASE":
-                    bpy.data.collections['Collection'].objects.link(ob_dup)
-                ob_dup.name = self.NewMeshName + str(currentcount)
-            
-                # Create the new object by linking to the template's mesh data
-                new_object = ob_dup
-                new_object.location = obj.location
-                new_object.rotation_quaternion = obj.rotation_quaternion
-                new_object.scale = obj.scale
-
-                if self.SourcePost == "HIDE":
-                    obj.hide_viewport = True
-                    obj.hide_render = True
-                if self.SourcePost == "DELETE":
-                    bpy.ops.object.select_all(action='DESELECT')
-                    # select the object
-                    obj.select_set(True)
-                    # delete all selected objects
-                    bpy.ops.object.delete()
+        try:
+            objjj = bpy.data.objects[self.TemplateObject]
+            print(objjj)
+            for obj in selects:
+                bpy.data.objects[self.TemplateObject].select_set(True)
+                templatee = bpy.context.selected_objects[0]
+                if obj != templatee:
+                    transformss.append([obj.location, obj.rotation_quaternion, obj.scale])
+                    collectionss = obj.users_collection
+        
                     
-                # Create a new animation for the newly created object
-                nextcount = currentcount + 1
-                currentcount = nextcount
+                    # ob = bpy.data.objects.get(self.TemplateObject)
+                    
+                    ob_dup = templatee.copy()
+                    
+                    
+                    if self.TargetCollectionPost == "COPY":
+                        for collection in collectionss:
+                            collection.objects.link(ob_dup)
+                    if self.TargetCollectionPost == "BASE":
+                        bpy.data.collections['Collection'].objects.link(ob_dup)
+                    ob_dup.name = self.NewMeshName + str(currentcount)
+                
+                    # Create the new object by linking to the template's mesh data
+                    new_object = ob_dup
+                    new_object.location = obj.location
+                    new_object.rotation_quaternion = obj.rotation_quaternion
+                    new_object.scale = obj.scale
+
+                    if self.SourcePost == "HIDE":
+                        obj.hide_viewport = True
+                        obj.hide_render = True
+                    if self.SourcePost == "DELETE":
+                        bpy.ops.object.select_all(action='DESELECT')
+                        # select the object
+                        obj.select_set(True)
+                        # delete all selected objects
+                        bpy.ops.object.delete()
+                        
+                    # Create a new animation for the newly created object
+                    nextcount = currentcount + 1
+                    currentcount = nextcount
+            ShowMessageBox("Finished Swaping objects!", "Quick Tools : Swap Complete!", 'HEART')
+        
+        except :
+            #Shows a message box with a message, custom title, and a specific icon
+            ShowMessageBox("Please set the Template Object Name correctly then hit enter.", "Template Object Not Found", 'ERROR')
+            
         return {'FINISHED'}
 
 
@@ -163,6 +188,7 @@ class OBJECT_MT_swapmenu(bpy.types.Menu):
     def draw(self, context):
         layout = self.layout
         layout.operator(OBJECT_OT_swapobjectsingle.bl_idname)
+        layout.operator(OBJECT_OT_swapobjectselections.bl_idname)
 classes = [
 	OBJECT_OT_swapobjectsingle,
 	OBJECT_OT_swapobjectselections,
@@ -178,8 +204,8 @@ class swapObject_PT_panel(Panel):
     bl_category = 'QuickTools'
 
     def draw(self, context):
-        operator = self.layout.operator('object.swapobjectsingle', icon='BLENDER', text='Swap Objects By Name')
-        operatorb = self.layout.operator('object.swapobjectselections', icon='BLENDER', text='Swap Selected Objects')
+        operator = self.layout.operator('object.swapobjectsingle', icon='SMALL_CAPS', text='Swap Objects By Name')
+        operatorb = self.layout.operator('object.swapobjectselections', icon='SYSTEM', text='Swap Selected Objects')
         operator.NamePattern = context.window_manager.swapObject_vars.NamePattern
         operator.TemplateObject = context.window_manager.swapObject_vars.TemplateObject
         operator.NewMeshName = context.window_manager.swapObject_vars.NewMeshName

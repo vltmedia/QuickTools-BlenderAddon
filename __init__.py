@@ -8,7 +8,7 @@ bl_info = {
 	'author': 'VLT Media LLC',
 	'license': 'GPL',
 	'deps': '',
-	'version': (0, 1, 10),
+	'version': (0, 1, 3, 1),
 	'blender': (2, 90, 1),
 	'location': 'View3D > Quick Tools',
 	'warning': '',
