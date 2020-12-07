@@ -3,12 +3,25 @@ from bpy.props import IntProperty, PointerProperty, BoolProperty, CollectionProp
 
 from bpy.types import Panel, PropertyGroup, WindowManager
 
+SourcePostEnum = [
+    ("HIDE", "Hide", "", 1),
+    ("DELETE", "Delete", "", 2),
+    ("NOTHING", "Nothing", "", 3),
+    
+]
+TargetCollectionPostEnum = [
+    ("COPY", "Copy", "", 1),
+    ("BASE", "Default", "", 2),
+    
+]
 # This is the tab area
 class swapObjectVars(PropertyGroup):
     NamePattern: bpy.props.StringProperty(name="Source Name Pattern", default="Cube.*")
     TemplateObject: bpy.props.StringProperty(name="Template Object Name", default="Template")
-
-
+    NewMeshName: bpy.props.StringProperty(name="New Mesh Name Template", default="NewObjectName_")
+    
+    SourcePost: bpy.props.EnumProperty(items=SourcePostEnum, name="Source Handling")
+    TargetCollectionPost: bpy.props.EnumProperty(items=TargetCollectionPostEnum, name="Target Collection")
 
 
 
@@ -24,6 +37,10 @@ class OBJECT_OT_swapobjectsingle(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
     NamePattern: bpy.props.StringProperty(name="Source Name Pattern", default="Cube.*")
     TemplateObject: bpy.props.StringProperty(name="Template Object Name", default="Template")
+    NewMeshName: bpy.props.StringProperty(name="New Mesh Name Template", default="NewObjectName_")
+    SourcePost: bpy.props.EnumProperty(items=SourcePostEnum, name="Source Handling")
+    TargetCollectionPost: bpy.props.EnumProperty(items=TargetCollectionPostEnum, name="Target Collection")
+    
 
 
     def execute(self, context):
@@ -31,34 +48,113 @@ class OBJECT_OT_swapobjectsingle(bpy.types.Operator):
         selects = context.selected_objects
         currentcount = 0
         transformss = []
-        for obj in selects:
-            transformss.append([obj.location, obj.rotation_quaternion, obj.scale])
-            
-            ob = bpy.data.objects.get(self.TemplateObject)
-            # ob = bpy.data.objects.get("Template")
-            ob_dup = ob.copy()
-            print(ob_dup.name)
-            bpy.data.collections['Collection'].objects.link(ob_dup)
-            ob_dup.name = 'NewObjectName_' + str(currentcount)
-            # template_object = bpy.data.objects.get('Template')
-            # template_object = context.selected_objects[0]
-            # if template_object:
-            # Create the new object by linking to the template's mesh data
-            new_object = ob_dup
-            obj.hide_viewport = True
-            obj.hide_render = True
-            # new_object = bpy.data.objects.new('NewObjectName_' + str(currentcount), template_object.data)
-            # Create a new animation for the newly created object
-            nextcount = currentcount + 1
-            currentcount = nextcount
-            print(new_object.location)
-            
-            new_object.location = obj.location
-            print(obj.location)
         
-            # Link the new object to the appropriate collection
+        for obj in selects:
+            bpy.data.objects[self.TemplateObject].select_set(True)
+            templatee = bpy.context.selected_objects[0]
+            if obj != templatee:
+            
+                transformss.append([obj.location, obj.rotation_quaternion, obj.scale])
+                collectionss = obj.users_collection
+                
+                # ob = bpy.data.objects.get(self.TemplateObject)
+                
+                ob_dup = templatee.copy()
+                
+                
+                if self.TargetCollectionPost == "COPY":
+                    for collection in collectionss:
+                        collection.objects.link(ob_dup)
+                if self.TargetCollectionPost == "BASE":
+                    bpy.data.collections['Collection'].objects.link(ob_dup)
+                ob_dup.name = self.NewMeshName + str(currentcount)
+            
+                # Create the new object by linking to the template's mesh data
+                new_object = ob_dup
+                new_object.location = obj.location
+                new_object.rotation_quaternion = obj.rotation_quaternion
+                new_object.scale = obj.scale
 
+
+                if self.SourcePost == "HIDE":
+                    obj.hide_viewport = True
+                    obj.hide_render = True
+                if self.SourcePost == "DELETE":
+                    bpy.ops.object.select_all(action='DESELECT')
+                    # select the object
+                    obj.select_set(True)
+                    # delete all selected objects
+                    bpy.ops.object.delete()
+                    
+                # Create a new animation for the newly created object
+                nextcount = currentcount + 1
+                currentcount = nextcount
         return {'FINISHED'}
+
+
+
+
+# bpy.utils.register_class(SwapNameSettings)
+class OBJECT_OT_swapobjectselections(bpy.types.Operator):
+    bl_idname = 'object.swapobjectselections'
+    bl_label = 'Swap Object Selections'
+    bl_options = {'REGISTER', 'UNDO'}
+    TemplateObject: bpy.props.StringProperty(name="Template Object Name", default="Template")
+    NewMeshName: bpy.props.StringProperty(name="New Mesh Name Template", default="NewObjectName_")
+    SourcePost: bpy.props.EnumProperty(items=SourcePostEnum, name="Source Handling")
+    TargetCollectionPost: bpy.props.EnumProperty(items=TargetCollectionPostEnum, name="Target Collection")
+    
+
+
+    def execute(self, context):
+        selects = bpy.context.selected_objects
+        currentcount = 0
+        transformss = []
+        lastindex = len(selects) - 1
+    
+        for obj in selects:
+            bpy.data.objects[self.TemplateObject].select_set(True)
+            templatee = bpy.context.selected_objects[0]
+            if obj != templatee:
+                transformss.append([obj.location, obj.rotation_quaternion, obj.scale])
+                collectionss = obj.users_collection
+    
+                
+                # ob = bpy.data.objects.get(self.TemplateObject)
+                
+                ob_dup = templatee.copy()
+                
+                
+                if self.TargetCollectionPost == "COPY":
+                    for collection in collectionss:
+                        collection.objects.link(ob_dup)
+                if self.TargetCollectionPost == "BASE":
+                    bpy.data.collections['Collection'].objects.link(ob_dup)
+                ob_dup.name = self.NewMeshName + str(currentcount)
+            
+                # Create the new object by linking to the template's mesh data
+                new_object = ob_dup
+                new_object.location = obj.location
+                new_object.rotation_quaternion = obj.rotation_quaternion
+                new_object.scale = obj.scale
+
+                if self.SourcePost == "HIDE":
+                    obj.hide_viewport = True
+                    obj.hide_render = True
+                if self.SourcePost == "DELETE":
+                    bpy.ops.object.select_all(action='DESELECT')
+                    # select the object
+                    obj.select_set(True)
+                    # delete all selected objects
+                    bpy.ops.object.delete()
+                    
+                # Create a new animation for the newly created object
+                nextcount = currentcount + 1
+                currentcount = nextcount
+        return {'FINISHED'}
+
+
+
 
 class OBJECT_MT_swapmenu(bpy.types.Menu):
     bl_idname = 'object.swapmenu'
@@ -69,6 +165,7 @@ class OBJECT_MT_swapmenu(bpy.types.Menu):
         layout.operator(OBJECT_OT_swapobjectsingle.bl_idname)
 classes = [
 	OBJECT_OT_swapobjectsingle,
+	OBJECT_OT_swapobjectselections,
 	OBJECT_MT_swapmenu
 ]
 
@@ -82,68 +179,23 @@ class swapObject_PT_panel(Panel):
 
     def draw(self, context):
         operator = self.layout.operator('object.swapobjectsingle', icon='BLENDER', text='Swap Objects By Name')
+        operatorb = self.layout.operator('object.swapobjectselections', icon='BLENDER', text='Swap Selected Objects')
         operator.NamePattern = context.window_manager.swapObject_vars.NamePattern
         operator.TemplateObject = context.window_manager.swapObject_vars.TemplateObject
+        operator.NewMeshName = context.window_manager.swapObject_vars.NewMeshName
+        operator.SourcePost = context.window_manager.swapObject_vars.SourcePost
+        operator.TargetCollectionPost = context.window_manager.swapObject_vars.TargetCollectionPost
+        
+        operatorb.TemplateObject = context.window_manager.swapObject_vars.TemplateObject
+        operatorb.NewMeshName = context.window_manager.swapObject_vars.NewMeshName
+        operatorb.SourcePost = context.window_manager.swapObject_vars.SourcePost
+        operatorb.TargetCollectionPost = context.window_manager.swapObject_vars.TargetCollectionPost
+        
         self.layout.prop(context.window_manager.swapObject_vars, 'NamePattern')
         self.layout.prop(context.window_manager.swapObject_vars, 'TemplateObject')
-
-
-# class swapObject_OT_swapbyname(Operator):
-#     bl_idname = 'swapObject.swapbyname'
-#     bl_label = 'swapObject: swapbyname'
-#     bl_description = 'swapObject - swapbyname'
-#     bl_options = {'REGISTER', 'UNDO'}
-
-#     NamePattern: bpy.props.StringProperty(name="Source Name Pattern", default="Cube.*")
-#     TemplateObject: bpy.props.StringProperty(name="Template Object Name", default="Template")
-
-#     def execute(self, context):
-#         bpy.ops.object.select_pattern(pattern= self.NamePattern)
-#         selects = context.selected_objects
-#         currentcount = 0
-#         transformss = []
-#         for obj in selects:
-#             transformss.append([obj.location, obj.rotation_quaternion, obj.scale])
-            
-#             ob = bpy.data.objects.get(self.TemplateObject)
-#             # ob = bpy.data.objects.get("Template")
-#             ob_dup = ob.copy()
-#             print(ob_dup.name)
-#             bpy.data.collections['Collection'].objects.link(ob_dup)
-#             ob_dup.name = 'NewObjectName_' + str(currentcount)
-#             # Create the new object by linking to the template's mesh data
-#             new_object = ob_dup
-#             obj.hide_viewport = True
-#             obj.hide_render = True
-#             # new_object = bpy.data.objects.new('NewObjectName_' + str(currentcount), template_object.data)
-#             # Create a new animation for the newly created object
-#             nextcount = currentcount + 1
-#             currentcount = nextcount
-#             print(new_object.location)
-            
-#             new_object.location = obj.location
-#             print(obj.location)
-        
-#         return {'FINISHED'}
-
-#     @classmethod
-#     def poll(cls, context):
-#         return True
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        self.layout.prop(context.window_manager.swapObject_vars, 'NewMeshName')
+        self.layout.prop(context.window_manager.swapObject_vars, 'SourcePost')
+        self.layout.prop(context.window_manager.swapObject_vars, 'TargetCollectionPost')
 
 
 

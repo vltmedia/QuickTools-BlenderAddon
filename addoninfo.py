@@ -7,7 +7,7 @@ class addonInfo():
 	'author': 'VLT Media LLC',
 	'license': 'GPL',
 	'deps': '',
-	'version': (0, 1, 8),
+	'version': (0, 1, 10),
 	'blender': (2, 90, 1),
 	'location': 'View3D > Quick Tools',
 	'warning': '',
