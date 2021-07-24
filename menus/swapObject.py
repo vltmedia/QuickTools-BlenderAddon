@@ -198,7 +198,7 @@ classes = [
 
 class swapObject_PT_panel(Panel):
     bl_idname = 'swapObject_PT_panel'
-    bl_label = 'Quick Tools'
+    bl_label = 'Swap & Replace'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_category = 'QuickTools'

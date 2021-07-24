@@ -1,6 +1,6 @@
 from .addoninfo import addonInfo
 import bpy
-from .menus import swapObject
+from .menus import swapObject, pipelineUpdateScene
 
 bl_info = {
 	'name': 'QuickTools',
@@ -8,7 +8,7 @@ bl_info = {
 	'author': 'VLT Media LLC',
 	'license': 'GPL',
 	'deps': '',
-	'version': (0, 1, 3, 1),
+	'version': (0, 1, 4, 2),
 	'blender': (2, 90, 1),
 	'location': 'View3D > Quick Tools',
 	'warning': '',
@@ -21,8 +21,9 @@ bl_info = {
 
 def menu_func(self, context):
     self.layout.menu(swapObject.OBJECT_MT_swapmenu.bl_idname)
+    self.layout.menu(pipelineUpdateScene.OBJECT_MT_pipelineupdate.bl_idname)
 
-class VIEW3D_MT_menu_treats(bpy.types.Menu):
+class VIEW3D_MT_menu_swapreplace(bpy.types.Menu):
     bl_label = "Quick Tools"
     # Set the menu operators and draw functions
     def draw(self, context):
@@ -32,18 +33,19 @@ class VIEW3D_MT_menu_treats(bpy.types.Menu):
        
 def add_gis_menu(self, context):
     if context.mode == 'OBJECT':
-        self.layout.menu('VIEW3D_MT_menu_treats')
+        self.layout.menu('VIEW3D_MT_menu_swapreplace')
 
 def register():
+    pipelineUpdateScene.register()
     swapObject.register()
     
     try:
-        bpy.utils.register_class(VIEW3D_MT_menu_treats)
+        bpy.utils.register_class(VIEW3D_MT_menu_swapreplace)
     except ValueError as e:
-        bpy.utils.unregister_class(VIEW3D_MT_menu_treats)
-        bpy.utils.register_class(VIEW3D_MT_menu_treats)
+        bpy.utils.unregister_class(VIEW3D_MT_menu_swapreplace)
+        bpy.utils.register_class(VIEW3D_MT_menu_swapreplace)
     bpy.types.VIEW3D_MT_editor_menus.append(add_gis_menu)
-    bpy.types.VIEW3D_MT_menu_treats.append(menu_func)
+    bpy.types.VIEW3D_MT_menu_swapreplace.append(menu_func)
 
 def unregister():
     # bpy.utils.unregister_class(OBJECT_OT_myooperator)
